@@ -7,11 +7,13 @@ import { generalizedAIPoweredPokemonQuery } from '@/server/actions/pokemon-ai'
 import { DynamicTable, TableData } from './dynamic-table'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
+import Image from 'next/image'
 
 export function PokemonComponent() {
   const [inputValue, setInputValue] = useState('')
   const [outputData, setOutput] = useState<TableData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [analysis, setAnalysis] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,6 +21,8 @@ export function PokemonComponent() {
     try {
       const result = await generalizedAIPoweredPokemonQuery(inputValue)
       setOutput(result)
+      // Assuming the AI function returns an analysis along with the table data
+      // setAnalysis(result.analysis)
     } finally {
       setIsLoading(false)
       setInputValue('')
@@ -30,9 +34,18 @@ export function PokemonComponent() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full p-6 space-y-6 bg-gradient-to-br from-blue-100 to-red-100 rounded-lg shadow-lg h-full flex flex-col"
+      className="w-full p-6 space-y-6 bg-gradient-to-br from-blue-100 to-red-100 rounded-lg shadow-lg h-full flex flex-col relative overflow-hidden"
     >
-      <div className="relative">
+      <div 
+        className="absolute inset-0 z-0 opacity-10"
+        style={{
+          backgroundImage: 'url("/pokeballbg.svg")',
+          backgroundRepeat: 'repeat',
+          backgroundSize: '100px 100px',
+        }}
+      />
+      
+      <div className="relative z-10">
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 transform -skew-y-6 shadow-xl"></div>
         <div className="flex bg-white rounded-lg shadow-lg p-6 border-4 border-blue-500  max-height-[500px]">
           <h2 className="text-2xl font-bold text-center mb-4 text-blue-600 z-50">AI Pokédex</h2>
@@ -42,7 +55,7 @@ export function PokemonComponent() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
         <div className="relative">
           <Input
             type="text"
@@ -71,6 +84,50 @@ export function PokemonComponent() {
           )}
         </Button>
       </form>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="relative h-[175px] bg-white bg-opacity-75 rounded-lg p-6 shadow-lg border-2 border-yellow-400 overflow-hidden z-10"
+      >
+        <div className="h-full overflow-auto">
+          <h3 className="text-xl font-bold mb-4 text-blue-600">Analysis</h3>
+          <AnimatePresence mode="wait">
+            {isLoading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex justify-center items-center h-full"
+              >
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              </motion.div>
+            ) : analysis ? (
+              <motion.p
+                key="analysis"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-gray-800"
+              >
+                {analysis}
+              </motion.p>
+            ) : (
+              <motion.p
+                key="instruction"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-gray-800 font-medium text-center"
+              >
+                Ask a question to see the analysis here!
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
 
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}

@@ -1,63 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
   <defs>
-    <g id="pokeball">
-      <circle cx="0" cy="0" r="20" fill="white" stroke="black" stroke-width="2"/>
-      <path d="M-20 0 H20" stroke="black" stroke-width="2"/>
-      <path d="M-20 0 A20 20 0 0 0 20 0" fill="red" stroke="black" stroke-width="2"/>
-      <circle cx="0" cy="0" r="6" fill="white" stroke="black" stroke-width="2">
-        <animate attributeName="r" values="6;7;6" dur="2s" repeatCount="indefinite"/>
-        <animate attributeName="fill-opacity" values="1;0.7;1" dur="2s" repeatCount="indefinite"/>
-      </circle>
-    </g>
+    <pattern id="pokeball-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+      <g id="pokeball">
+        <circle cx="50" cy="50" r="25" fill="white" stroke="black" stroke-width="2"/>
+        <path d="M25 50 H75" stroke="black" stroke-width="2"/>
+        <path d="M25 50 A25 25 0 0 0 75 50" fill="red" stroke="black" stroke-width="2"/>
+        <circle cx="50" cy="50" r="7.5" fill="white" stroke="black" stroke-width="2">
+          <animate attributeName="r" values="7.5;8.75;7.5" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="fill-opacity" values="1;0.7;1" dur="2s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </pattern>
   </defs>
   
-  <rect width="100%" height="100%" fill="#f0f0f0"/>
-  
-  <g>
-    <use href="#pokeball" x="50" y="50">
-      <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="4s" repeatCount="indefinite"/>
-    </use>
-  </g>
-  
-  <g>
-    <use href="#pokeball" x="150" y="100">
-      <animateTransform attributeName="transform" type="rotate" from="0 150 100" to="360 150 100" dur="5s" repeatCount="indefinite"/>
-    </use>
-  </g>
-  
-  <g>
-    <use href="#pokeball" x="250" y="50">
-      <animateTransform attributeName="transform" type="rotate" from="0 250 50" to="360 250 50" dur="6s" repeatCount="indefinite"/>
-    </use>
-  </g>
-  
-  <g>
-    <use href="#pokeball" x="350" y="100">
-      <animateTransform attributeName="transform" type="rotate" from="0 350 100" to="360 350 100" dur="4.5s" repeatCount="indefinite"/>
-    </use>
-  </g>
-  
-  <g>
-    <use href="#pokeball" x="50" y="250">
-      <animateTransform attributeName="transform" type="rotate" from="0 50 250" to="360 50 250" dur="5.5s" repeatCount="indefinite"/>
-    </use>
-  </g>
-  
-  <g>
-    <use href="#pokeball" x="150" y="300">
-      <animateTransform attributeName="transform" type="rotate" from="0 150 300" to="360 150 300" dur="4.2s" repeatCount="indefinite"/>
-    </use>
-  </g>
-  
-  <g>
-    <use href="#pokeball" x="250" y="250">
-      <animateTransform attributeName="transform" type="rotate" from="0 250 250" to="360 250 250" dur="5.8s" repeatCount="indefinite"/>
-    </use>
-  </g>
-  
-  <g>
-    <use href="#pokeball" x="350" y="300">
-      <animateTransform attributeName="transform" type="rotate" from="0 350 300" to="360 350 300" dur="4.7s" repeatCount="indefinite"/>
-    </use>
-  </g>
+  <rect width="100%" height="100%" fill="url(#pokeball-pattern)"/>
 </svg>
