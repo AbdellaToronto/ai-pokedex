@@ -31,7 +31,7 @@ export const generalizedAIPoweredPokemonQuery = async (query: string) => {
         When given a natural language question, you just provide a valid postgres query that can be run against the DB.
         When making a query, if it only has one column, consider what additional valuable information you could add, and try to keep the columns to 3 at minimum, 7 maximum.
 
-        
+
 
 
             Here are list of errors you've made that you need to be careful of!:
@@ -130,6 +130,10 @@ export const generalizedAIPoweredPokemonQuery = async (query: string) => {
             WHERE
             p1.name = 'Sandshrew'
             AND p1.id != p2.id;
+
+
+            Also be careful of this error:
+            error: more than one row returned by a subquery used as an expression
         `,
         prompt: query,
       });

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { generalizedAIPoweredPokemonQuery, generatePokemonBadge, streamAIAnalysis } from '@/server/actions/pokemon-ai'
 import { DynamicTable, TableData } from './dynamic-table'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -18,6 +19,14 @@ export function PokemonComponent() {
   const [isLoading, setIsLoading] = useState(false)
   const [analysis, setAnalysis] = useState<string>('')
   const [badgeData, setBadgeData] = useState<any>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,6 +52,35 @@ export function PokemonComponent() {
       setInputValue('')
     }
   }
+
+  const renderAnalysisContent = () => (
+    <motion.div
+      key="analysis"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="text-gray-800"
+    >
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        {analysis}
+      </ReactMarkdown>
+    </motion.div>
+  )
+
+  const renderBadgeContent = () => (
+    badgeData && (
+      <PokemonBadgeCard
+        imageUrl={badgeData.imageUrl}
+        header={badgeData.header}
+        subheader={badgeData.subheader}
+        sections={badgeData.sections}
+        backgroundColor={badgeData.backgroundColor}
+        textColor={badgeData.textColor}
+        width={250}
+        height={187.5}
+      />
+    )
+  )
 
   return (
     <motion.div 
@@ -146,58 +184,53 @@ export function PokemonComponent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="relative bg-white bg-opacity-75 rounded-lg p-6 shadow-lg border-2 border-yellow-400 overflow-hidden z-10 flex flex-col"
+          className="relative bg-white bg-opacity-75 rounded-lg p-4 md:p-6 shadow-lg border-2 border-yellow-400 overflow-hidden z-10 flex flex-col"
         >
-          <h3 className="text-xl font-bold mb-4 text-blue-600">Analysis</h3>
-          <div className="flex-grow overflow-auto max-h-[20vh] md:max-h-full">
-          {badgeData && (
-            <PokemonBadgeCard
-              imageUrl={badgeData.imageUrl}
-              header={badgeData.header}
-              subheader={badgeData.subheader}
-              sections={badgeData.sections}
-              backgroundColor={badgeData.backgroundColor}
-              textColor={badgeData.textColor}
-              width={250}
-              height={187.5}
-            />
+          {isMobile && badgeData ? (
+            <Tabs defaultValue="analysis" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="analysis">Analysis</TabsTrigger>
+                <TabsTrigger value="badge">Badge</TabsTrigger>
+              </TabsList>
+              <TabsContent value="analysis" className="flex-grow overflow-auto">
+                {renderAnalysisContent()}
+              </TabsContent>
+              <TabsContent value="badge" className="flex-grow overflow-auto">
+                {renderBadgeContent()}
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <>
+              <h3 className="text-xl font-bold text-blue-600 mb-4">Analysis</h3>
+              <div className="flex-grow overflow-auto">
+                {renderAnalysisContent()}
+                {renderBadgeContent()}
+              </div>
+            </>
           )}
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex justify-center items-center h-full"
-                >
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                </motion.div>
-              ) : analysis ? (
-                <motion.div
-                  key="analysis"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="text-gray-800"
-                >
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {analysis}
-                  </ReactMarkdown>
-                </motion.div>
-              ) : (
-                <motion.p
-                  key="instruction"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="text-gray-800 font-medium text-center"
-                >
-                  Ask a question to see the analysis here!
-                </motion.p>
-              )}
-            </AnimatePresence>
-          </div>
+          <AnimatePresence mode="wait">
+            {isLoading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex justify-center items-center h-full"
+              >
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              </motion.div>
+            ) : !analysis && !badgeData ? (
+              <motion.p
+                key="instruction"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-gray-800 font-medium text-center"
+              >
+                Ask a question to see the analysis here!
+              </motion.p>
+            ) : null}
+          </AnimatePresence>
         </motion.div>
       </div>
     </motion.div>
