@@ -62,6 +62,23 @@ const config: Config = {
   		}
   	}
   },
+  safelist: [
+    // Background colors
+    {
+      pattern: /^bg-/, // This will include all bg-* classes
+      variants: ['hover', 'focus'], // Include hover and focus variants
+    },
+    // Text colors
+    {
+      pattern: /^text-/, // This will include all text-* classes
+      variants: ['hover', 'focus'],
+    },
+    // Widths and heights (if you're dynamically setting these)
+    {
+      pattern: /^(w|h)-/, // This will include all w-* and h-* classes
+    },
+    // Add any other patterns for classes that might be dynamically generated
+  ],
   plugins: [require("tailwindcss-animate")],
 };
 export default config;
