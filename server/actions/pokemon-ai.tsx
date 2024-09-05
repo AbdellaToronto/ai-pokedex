@@ -5,6 +5,9 @@ import { pokemonSQLGet } from "./pokemon-sql";
 import { generateText, streamText } from "ai";
 import { PRISMA_SCHEMA } from "./constants";
 import { createStreamableValue } from 'ai/rsc';
+import { generateObject } from 'ai';
+import { z } from 'zod';
+
 
 export const generalizedAIPoweredPokemonQuery = async (query: string) => {
     const model = google('gemini-1.5-flash-latest');
@@ -80,4 +83,47 @@ export async function streamAIAnalysis(originalQuestion: string, query: string, 
     })();
 
     return { output: stream.value };
+}
+
+
+export async function generatePokemonBadge(analysis: string, sqlResult: any) {
+
+
+const PokemonBadgeSchema = z.object({
+    imageUrl: z.string().url().describe('The best potential PokeAPI sprite URL for the Pokemon'),
+    header: z.string().describe('The main title for the badge, typically the Pokemon name'),
+    subheader: z.string().optional().describe('A subtitle for the badge, could be the Pokemon type or a short description'),
+    sections: z.array(z.object({
+      content: z.string(),
+      scrollable: z.boolean().optional()
+    })).max(4).describe('Up to 4 sections of content for the badge'),
+    backgroundColor: z.string().optional().describe('A Tailwind CSS background color class'),
+    textColor: z.string().optional().describe('A Tailwind CSS text color class'),
+    width: z.number().optional(),
+    height: z.number().optional()
+  });
+
+  const model = google('gemini-1.5-pro-latest', {
+    structuredOutputs: false
+  });
+
+  const { object } = await generateObject({
+    model,
+    schema: PokemonBadgeSchema,
+    prompt: `
+      Based on the following analysis and SQL result, generate a structured object for a Pokemon badge card.
+      Choose appropriate colors, content, and a relevant PokeAPI sprite URL.
+      
+      Analysis: ${analysis}
+      
+      SQL Result: ${JSON.stringify(sqlResult)}
+      
+      For the imageUrl, use the format: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/[id].png
+      Where [id] is the Pokemon's ID number. If you're unsure of the exact ID, make your best guess based on the data.
+      
+      Ensure the content is concise and fits well within a small badge card.
+    `
+  });
+
+  return object;
 }

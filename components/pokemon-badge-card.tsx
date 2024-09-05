@@ -43,8 +43,8 @@ export function PokemonBadgeCard({
     <Card 
       className={`${backgroundColor} ${textColor} overflow-hidden`}
       style={{
-        width: `${width}px`,
         height: `${height}px`,
+        minHeight: `${height}px`,
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gridTemplateRows: 'auto auto 1fr 1fr',
