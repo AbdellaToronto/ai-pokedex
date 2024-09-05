@@ -30,12 +30,12 @@ export function PokemonComponent() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full p-6 space-y-6 bg-gradient-to-br from-blue-100 to-red-100 rounded-lg shadow-lg"
+      className="w-full p-6 space-y-6 bg-gradient-to-br from-blue-100 to-red-100 rounded-lg shadow-lg h-full flex flex-col"
     >
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 transform -skew-y-6 shadow-xl"></div>
-        <div className="relative bg-white rounded-lg shadow-lg p-6 border-4 border-blue-500">
-          <h2 className="text-2xl font-bold text-center mb-4 text-blue-600">AI Pokédex</h2>
+        <div className="flex bg-white rounded-lg shadow-lg p-6 border-4 border-blue-500  max-height-[500px]">
+          <h2 className="text-2xl font-bold text-center mb-4 text-blue-600 z-50">AI Pokédex</h2>
           <p className="text-gray-700 text-center animate-bounce">
             Gotta catch &apos;em all!
           </p>
@@ -78,7 +78,6 @@ export function PokemonComponent() {
         transition={{ duration: 0.3 }}
         className="relative overflow-hidden bg-white rounded-lg p-6 shadow-lg border-2 border-yellow-400"
       >
-        <div className="pokeball-pattern absolute inset-0 opacity-10"></div>
 
         <AnimatePresence mode="wait">
           {isLoading ? (
@@ -94,6 +93,7 @@ export function PokemonComponent() {
           ) : outputData ? (
             <motion.div
               key="table"
+              className="h-full"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}

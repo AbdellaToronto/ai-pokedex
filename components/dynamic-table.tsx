@@ -80,14 +80,14 @@ export function DynamicTable({ data }: { data: TableData }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-4"
+      className="space-y-4 flex flex-col h-full"
     >
       <div className="flex justify-between">
         <Input
           placeholder="Search..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
+          className="max-w-sm mr-2"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -106,7 +106,7 @@ export function DynamicTable({ data }: { data: TableData }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border flex-grow overflow-hidden flex flex-col">
         <Table>
           <TableHeader>
             <TableRow>
@@ -122,28 +122,32 @@ export function DynamicTable({ data }: { data: TableData }) {
               ))}
             </TableRow>
           </TableHeader>
-          <TableBody>
-            <AnimatePresence>
-              {filteredRows.map((row, index) => (
-                <motion.tr
-                  key={index}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.2, delay: index * 0.05 }}
-                >
-                  {data.fields.map((field) => (
-                    visibleColumns.includes(field.name) && (
-                      <TableCell key={field.name}>
-                        {row[field.name] !== null ? row[field.name] : 'N/A'}
-                      </TableCell>
-                    )
-                  ))}
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </TableBody>
         </Table>
+        <div className="overflow-auto flex-grow">
+          <Table>
+            <TableBody>
+              <AnimatePresence>
+                {filteredRows.map((row, index) => (
+                  <motion.tr
+                    key={index}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                  >
+                    {data.fields.map((field) => (
+                      visibleColumns.includes(field.name) && (
+                        <TableCell key={field.name}>
+                          {row[field.name] !== null ? row[field.name] : 'N/A'}
+                        </TableCell>
+                      )
+                    ))}
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </motion.div>
   )
