@@ -3,26 +3,33 @@
 import { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { generalizedAIPoweredPokemonQuery } from '@/server/actions/pokemon-ai'
+import { generalizedAIPoweredPokemonQuery, streamAIAnalysis } from '@/server/actions/pokemon-ai'
 import { DynamicTable, TableData } from './dynamic-table'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { readStreamableValue } from 'ai/rsc'
 
 export function PokemonComponent() {
   const [inputValue, setInputValue] = useState('')
   const [outputData, setOutput] = useState<TableData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [analysis, setAnalysis] = useState<string | null>(null)
+  const [analysis, setAnalysis] = useState<string>('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setAnalysis('')
     try {
       const result = await generalizedAIPoweredPokemonQuery(inputValue)
       setOutput(result)
-      // Assuming the AI function returns an analysis along with the table data
-      // setAnalysis(result.analysis)
+      const { output } = await streamAIAnalysis(inputValue, result.query, result.rows)
+      
+      for await (const delta of readStreamableValue(output)) {
+        setAnalysis(currentAnalysis => `${currentAnalysis}${delta}`)
+      }
     } finally {
       setIsLoading(false)
       setInputValue('')
@@ -105,15 +112,17 @@ export function PokemonComponent() {
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
               </motion.div>
             ) : analysis ? (
-              <motion.p
+              <motion.div
                 key="analysis"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="text-gray-800"
               >
-                {analysis}
-              </motion.p>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {analysis}
+                </ReactMarkdown>
+              </motion.div>
             ) : (
               <motion.p
                 key="instruction"

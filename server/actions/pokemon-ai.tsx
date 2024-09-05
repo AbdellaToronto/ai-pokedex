@@ -2,9 +2,9 @@
 
 import { google } from "@ai-sdk/google";
 import { pokemonSQLGet } from "./pokemon-sql";
-import { generateText } from "ai";
+import { generateText, streamText } from "ai";
 import { PRISMA_SCHEMA } from "./constants";
-
+import { createStreamableValue } from 'ai/rsc';
 
 export const generalizedAIPoweredPokemonQuery = async (query: string) => {
     const model = google('gemini-1.5-flash-latest');
@@ -39,5 +39,45 @@ export const generalizedAIPoweredPokemonQuery = async (query: string) => {
       const { rows, fields } = await pokemonSQLGet(parsedText);
       
       
-    return { rows: JSON.parse(JSON.stringify(rows)), fields: JSON.parse(JSON.stringify(fields)) }
+    return { rows: JSON.parse(JSON.stringify(rows)), fields: JSON.parse(JSON.stringify(fields)), query: parsedText }
+}
+
+
+export async function streamAIAnalysis(originalQuestion: string, query: string, results: { rows: any[], fields: any[] }) {
+    const model = google('gemini-1.5-flash-latest');
+    const stream = createStreamableValue('');
+
+    (async () => {
+        const { textStream } = await streamText({
+            model: model,
+            system: `
+            You give a clear and upbeat analysis, sounding kind of like a pokemon announcer, but not too corny.
+            A user has given a query to a pokemon database, and you provide an analysis of the data.
+            You'll get original request, the postgres query generated for that request, and the results of that query.
+
+            You'll then provide an analysis of the data, in a fun, engaging, and friendly tone.
+
+            You'll also provide a summary of the data in a way that's easy to understand, and provide some insight into what the data means.
+
+            You'll also provide some suggestions for how to improve the query, or what the user could do with the data.
+            Use markdown formatting to help.
+            `,
+            prompt: `
+            Original Request: ${originalQuestion}
+            ----------------------------------------------
+            Postgres Query: ${query}
+            ----------------------------------------------
+            Query Results: ${JSON.stringify(results)}
+            `,
+        });
+
+        for await (const delta of textStream) {
+            stream.update(delta);
+            console.log(delta)
+        }
+
+        stream.done();
+    })();
+
+    return { output: stream.value };
 }
