@@ -2,19 +2,105 @@
 
 import { google } from "@ai-sdk/google";
 import { pokemonSQLGet } from "./pokemon-sql";
-import { generateText, streamText } from "ai";
+import { generateText, streamText, generateObject } from "ai";
 import { PRISMA_SCHEMA } from "./constants";
 import { createStreamableValue } from 'ai/rsc';
-import { generateObject } from 'ai';
 import { z } from 'zod';
 
 
-export const generalizedAIPoweredPokemonQuery = async (query: string) => {
-    const model = google('gemini-1.5-flash-latest');
+export const preQueryQuestions = async (query: string) => {
+    const fastModel = google('gemini-1.5-flash-latest');
 
-    const { text } = await generateText({
-        model: model,
+    const step1 = await generateText({
+        model: fastModel,
         system: `
+        You are a Postgres querying expert, who can write incredibly valuable, complex and interesting queries.
+        You are also a Pokemon expert, and can answer questions about Pokemon, as someone with a deep understanding of both the brand and the public PokeAPI.
+        
+        You have access to a Postgres Database, which has all of this data - and now prisma as an ORM gives you a good breakdown of their relationships.
+
+        Here is the Prisma ORM schema for reference to the fields, tables and relationships:
+
+        \`\`\`
+        ${PRISMA_SCHEMA}
+        \`\`\`
+
+        When given a natural language question, your job is specifically to THNIK about what sort of important 
+        information the user is looking for. The question may not be specific to the kind of data in the database,
+        so you need to think about how to convert that into the most relevant data.
+
+        Your final output should be a bunch of questions that should be turned into their own 'subqueries' that will
+        pull out useful data to help make the best, final query. 
+
+        For example, if the user wants to know which pokemon are a mix of fire and other types, you would want to first ask - 
+        well what are all the types available in the database, and what are their strings? This is so that the final query
+        does not make the mistake of using a type name in a query that does not match the data exactly.
+
+        So just having an output with a bunch of questions that are good at breaking down the user's question into
+        the most relevant data is what you should do.
+
+        The final output, should just be a list of these questions, that can be used to generate the final query.
+        `,
+        prompt: `
+        This is the user's question:
+
+        ${query}
+        `
+    })
+
+    const { object } = await generateObject({
+        model: fastModel,
+        schema: z.object({
+            postgresQueries: z.array(z.string()).min(1).max(10).describe('A list of follow up queries that can be run in a postgres DB, without any edits'),
+        }),
+        system: `
+        You will be given a natural language question, and then you will be provided a list of follow up questions 
+        that are good at breaking down the user's question into the most relevant data.
+
+        Your job is to take these follow up questions, and turn them into 1-3 smaller queries that can be run against the DB to help
+        'fill in the blanks', so to speak. 
+
+        Here is the schema for the database you need to make POSTGRES queries against:
+
+        \`\`\`
+        ${PRISMA_SCHEMA}
+        \`\`\`
+        `,
+        prompt: `
+        This is the user's question:
+
+        ${query}
+
+        This is the list of follow up questions:
+
+        ${step1.text}
+        `
+    });
+
+    let results = []
+
+    for (const query of object.postgresQueries) {
+        const parsedQuery = query.replace('```sql\n', '').replace('\n```', '').replace('```\n', '').replace('\n```', '');
+        const { rows, fields } = await pokemonSQLGet(parsedQuery);
+        results.push({ rows: JSON.parse(JSON.stringify(rows)), fields: JSON.parse(JSON.stringify(fields)), query: parsedQuery })
+    }
+      
+      
+    return results
+}
+
+
+export const generalizedAIPoweredPokemonQuery = async (query: string, helperQueries: {query: string, rows: any[], fields: any[]}[]) => {
+    const smarterModel = google('gemini-1.5-pro-latest');
+
+
+    const formattedHelperQueries = helperQueries.map(query => `
+        Query: ${query.query}
+        Result: ${JSON.stringify(query.rows)}
+        ----------------------------------------------
+    `).join('\n');
+
+    const basePrompt = `
         You are a Postgres querying expert, who can write incredibly valuable, complex and interesting queries.
         You are also a Pokemon expert, and can answer questions about Pokemon, as someone with a deep understanding of both the brand and the public PokeAPI.
         
@@ -133,9 +219,25 @@ export const generalizedAIPoweredPokemonQuery = async (query: string) => {
 
 
             Also be careful of this error:
-            error: more than one row returned by a subquery used as an expression
+            error: more than one row returned by a subquery used as an expression.
+
+            Finally, when your thinking about your final query, even if users ask things like... what is the total number of pokemon that do X, or Y, 
+            you should not have the query only return a single value that sums up all the rows, ideally you should show all the rows that match, with columns that 
+            further help delinate the data in a useful way.
+        `
+
+    const { text } = await generateText({
+        model: smarterModel,
+        system: basePrompt,
+        prompt: `
+        This is the user's question:
+
+        ${query}
+
+        These are the result of the queries run to help answer the user's question:
+
+        ${formattedHelperQueries}
         `,
-        prompt: query,
       });
 
       // the response will often come with markdown ```sql ...``` - you need to remove the markdown and just return the raw query string
@@ -144,6 +246,37 @@ export const generalizedAIPoweredPokemonQuery = async (query: string) => {
 
       // ensure rows and fields are plain objects before returning
       const { rows, fields } = await pokemonSQLGet(parsedText);
+
+      if (rows.length === 0) {
+        // retry the query with a different approach
+        const { text: retryText } = await generateText({
+          model: smarterModel,
+          system: `${basePrompt}
+           
+          Additional note!:
+
+          You are the version of the query that is called when the previous query did not return any results.
+          So think carefully about what may have gone wrong with the previous query, and try to think of a new approach.
+
+          Here is the query that was run:
+
+          ${parsedText}
+          `,
+          prompt: `
+          This is the user's question:
+  
+          ${query}
+  
+          These are the result of the queries run to help answer the user's question:
+  
+          ${formattedHelperQueries}
+          `,
+        });
+
+        const { rows: retryRows, fields: retryFields } = await pokemonSQLGet(retryText);
+
+        return { rows: JSON.parse(JSON.stringify(retryRows)), fields: JSON.parse(JSON.stringify(retryFields)), query: retryText }
+      }
       
       
     return { rows: JSON.parse(JSON.stringify(rows)), fields: JSON.parse(JSON.stringify(fields)), query: parsedText }
@@ -166,7 +299,10 @@ export async function streamAIAnalysis(originalQuestion: string, query: string, 
 
             You'll also provide a summary of the data in a way that's easy to understand, and provide some insight into what the data means.
 
-            You'll also provide some suggestions for how to improve the query, or what the user could do with the data.
+            You'll also provide some suggestions for what follow up questions the user could ask to get more information.
+
+            Try to also throw in some fun facts about the data, or something that might be surprising or interesting about the data or pokemon itself, related to the query.
+
             Use markdown formatting to help.
             `,
             prompt: `

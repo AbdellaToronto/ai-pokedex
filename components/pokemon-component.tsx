@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { generalizedAIPoweredPokemonQuery, generatePokemonBadge, streamAIAnalysis } from '@/server/actions/pokemon-ai'
+import { generalizedAIPoweredPokemonQuery, generatePokemonBadge, preQueryQuestions, streamAIAnalysis } from '@/server/actions/pokemon-ai'
 import { DynamicTable, TableData } from './dynamic-table'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
@@ -34,7 +34,10 @@ export function PokemonComponent() {
     setAnalysis('')
     setBadgeData(null)
     try {
-      const result = await generalizedAIPoweredPokemonQuery(inputValue)
+
+      const helperQueries = await preQueryQuestions(inputValue)
+
+      const result = await generalizedAIPoweredPokemonQuery(inputValue, helperQueries)
       setOutput(result)
       const { output } = await streamAIAnalysis(inputValue, result.query, result.rows)
       
