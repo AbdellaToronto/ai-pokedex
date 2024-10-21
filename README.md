@@ -1,4 +1,41 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# PokeAPI Project
+
+This project uses a PostgreSQL database with Prisma ORM.
+
+## Setting up the local development environment
+
+To set up your local development environment, follow these steps:
+
+1. Ensure you have Docker installed on your machine.
+
+2. Clone this repository:
+   ```
+   git clone git@github.com:AbdellaToronto/pokeapi.git
+   cd pokeapi
+   ```
+
+3. Run the setup script:
+   ```
+   chmod +x setup_local_db.sh
+   ./setup_local_db.sh
+   ```
+
+   This script will:
+   - Start a PostgreSQL container using Docker
+   - Import the SQL dump into the container
+   - Generate the Prisma schema file
+   - Set up the necessary environment variables
+
+4. Once the script completes, your local development environment is ready!
+
+5. You can now run your Next.js application:
+   ```
+   npm run dev
+   ```
+
+## Updating the database
+
+If you need to update the database schema or data, you can modify the `pokeapi_dump.sql` file and run the setup script again. It will recreate the Docker container with the updated data.
 
 ## Getting Started
 
