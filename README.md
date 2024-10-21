@@ -1,4 +1,4 @@
-# PokeAPI Project
+# AI Pokedex
 
 This project uses a PostgreSQL database with Prisma ORM.
 
@@ -10,8 +10,8 @@ To set up your local development environment, follow these steps:
 
 2. Clone this repository:
    ```
-   git clone git@github.com:AbdellaToronto/pokeapi.git
-   cd pokeapi
+   git clone git@github.com:AbdellaToronto/ai-pokedex.git
+   cd ai-pokedex
    ```
 
 3. Run the setup script:
@@ -32,6 +32,18 @@ To set up your local development environment, follow these steps:
    ```
    npm run dev
    ```
+
+## To get a free API key through Google AI Studio, read this!
+
+To access the Gemini API and start building with Google's advanced AI models, you can obtain a free API key through Google AI Studio. Here's a summary of the important steps:
+
+1. Visit [Google AI Studio](https://aistudio.google.com/) to test Gemini models without writing any code.
+2. In the top left corner of AI Studio, click on "Get API Key" to generate your Gemini API key.
+3. The free tier includes 1,500 requests per day with Gemini 1.5 Flash.
+4. You can use this API key in your code to access Gemini models, including Gemini 1.5 Flash and Gemini 1.5 Pro.
+5. With just a few lines of code, you can start generating content or creating chat interactions using the Gemini API.
+
+For more detailed information on using the Gemini API, including code examples and pricing details, check out this comprehensive guide: [Everything you need to know about the Gemini API as a developer in less than 5 minutes](https://medium.com/around-the-prompt/everything-you-need-to-know-about-the-gemini-api-as-a-developer-in-less-than-5-minutes-5e75343ccff9).
 
 ## Updating the database
 
