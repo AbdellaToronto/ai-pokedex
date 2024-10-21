@@ -8,9 +8,28 @@ import { createStreamableValue } from "ai/rsc";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-export const generalizedAIPoweredPokemonQuery = async (query: string) => {
+type QueryResult = {
+  rows: any[];
+  fields: any[];
+  query: string;
+};
+
+/**
+ * This function takes a natural language question from a user, and generates a postgres query that can be run against the DB.
+ * It also returns the results of the query, and the fields that are returned.
+ * @param { string } query - The natural language question from the user
+ * @returns { Promise<QueryResult> } - The results of the query, the fields that are returned, and the query that was run
+ */
+export const generalizedAIPoweredPokemonQuery = async (
+  query: string
+): Promise<QueryResult> => {
+  // The model that we want to use for translation.
+  // Vercel AI SDK makes it VERY easy to swap models, and we can do so here.
+  // https://sdk.vercel.ai/providers/ai-sdk-providers
   const model = google("gemini-1.5-flash-latest");
 
+  // Generate Text is a function from the Vercel AI SDK that makes it easy to generate text with a model.
+  // https://sdk.vercel.ai/docs/ai-sdk-core/generating-text
   const { text } = await generateText({
     model: model,
     system: `
@@ -145,7 +164,9 @@ export const generalizedAIPoweredPokemonQuery = async (query: string) => {
     .replace("```\n", "")
     .replace("\n```", "");
 
-  // ensure rows and fields are plain objects before returning
+  // This function takes the query, and runs it against the DB.
+  // We need to ensure rows and fields are plain objects before returning,
+  // because Prisma returns some objects that are not serializable.
   const { rows, fields } = await pokemonSQLGet(parsedText);
 
   return {
@@ -198,7 +219,26 @@ export async function streamAIAnalysis(
   return { output: stream.value };
 }
 
-export async function generatePokemonBadge(analysis: string, sqlResult: any) {
+export type PokemonBadge = {
+  imageUrl: string;
+  header: string;
+  subheader?: string;
+  sections: { content: string; scrollable?: boolean }[];
+  backgroundColor?: string;
+  textColor?: string;
+};
+
+/**
+ * This function takes the analysis of the query, and the results of the query,
+ * and generates a structured object for a Pokemon badge card.
+ * @param { string } analysis - The analysis of the query
+ * @param { any } sqlResult - The results of the query
+ * @returns { Promise<PokemonBadge> } - The structured object for the Pokemon badge card
+ */
+export async function generatePokemonBadge(
+  analysis: string,
+  sqlResult: any
+): Promise<PokemonBadge> {
   const PokemonBadgeSchema = z.object({
     imageUrl: z
       .string()
