@@ -49,6 +49,28 @@ For more detailed information on using the Gemini API, including code examples a
 
 If you need to update the database schema or data, you can modify the `pokeapi_dump.sql` file and run the setup script again. It will recreate the Docker container with the updated data.
 
+
+## Challenges!
+
+1. The current implementation of the AI query generation might be better, please spend some time thinking about how we can improve it.
+   - Can we make it more robust, handling errors for example?
+   - What sort of improvements in the UI/UX can we make that better inform the user of what's happening?
+   - The prompt itself is long and does a lot of things, how much is necessary? How can we improve it?
+
+2. The current implementation of the Pokemon badge is cool, how can we make it cooler?
+    - Take a deep look at the object generation syntax for the Vercel AI SDK, what other things can we add here to improve the badge?
+    - Additionally, if you want to push yourself, take a look at Vercel AI SDK RSC (React Server Components), can we switch to using that? What are the pros and cons?
+
+3. The current implementation of the Pokemon Announcer is cool, how can we make it cooler?
+    - Take a look at the prompt for this part of the code, what is it doing and how can we improve it?
+    - It's streaming text versus generating text, what are the pros and cons of each?
+    - What could we do if we instead had an object generated? Further, could we _stream_ that object?
+
+4. We are using Google's Gemini model for this project, what would we need to do if we wanted to swap out for another model?
+    - Where exactly would we make this change?
+    - Is there any way we could make this dynamic, or abstracted in some way?
+    - What are some of the pros and cons of each model? (Hint - Gemini's model is okay at this task, but has one particular strength! What is it?)
+
 ## Getting Started
 
 First, run the development server:
