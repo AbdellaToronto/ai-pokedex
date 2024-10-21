@@ -43,7 +43,7 @@ export function PokemonComponent() {
       const { output } = await streamAIAnalysis(
         inputValue,
         result.query,
-        result.rows
+        result
       );
 
       let fullAnalysis = "";
