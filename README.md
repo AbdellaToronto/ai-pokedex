@@ -35,7 +35,7 @@ To set up your local development environment, follow these steps:
      ```
      sudo systemctl status docker
      ```
-     If it's not running, start it with:
+     If (on Linux) it's not running, start it with:
      ```
      sudo systemctl start docker
      ```
