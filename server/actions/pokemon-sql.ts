@@ -1,11 +1,13 @@
 'use server';
 
-import { sql } from "@vercel/postgres";
+import { sql } from "@/db";
+
+// Use sql.query for database operations
 
 
 export const pokemonSQLGet = async (query: string) => {
     try {
-        const result = await sql.query(`${query}`);
+        const result = await sql.query(query);
         return result;
     } catch (error: any) {
         console.error('SQL Error:', error);

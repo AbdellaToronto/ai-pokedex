@@ -17,10 +17,19 @@ DB_NAME="pokeapi"
 DB_USER="postgres"
 DB_PASSWORD="postgres"
 DB_PORT="5432"
+DB_HOST="localhost"
+
+# Construct the connection string
+CONNECTION_STRING="postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?schema=public"
 
 # Update .env file
 echo "Updating .env file..."
-echo "DATABASE_URL=\"postgresql://$DB_USER:$DB_PASSWORD@localhost:$DB_PORT/$DB_NAME?schema=public\"" > .env
+cat << EOF > .env
+VERCEL_ENV=development
+POSTGRES_URL="$CONNECTION_STRING"
+EOF
+
+echo ".env file updated with POSTGRES_URL"
 
 # Start PostgreSQL container
 echo "Starting PostgreSQL container..."
@@ -33,9 +42,5 @@ sleep 10
 # Import the SQL dump
 echo "Importing SQL dump..."
 docker exec -i pokeapi-postgres psql -U $DB_USER -d $DB_NAME < pokeapi_dump.sql
-
-# Generate Prisma schema
-echo "Generating Prisma schema..."
-prisma db pull
 
 echo "Local development environment setup complete!"
