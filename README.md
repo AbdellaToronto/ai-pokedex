@@ -8,13 +8,33 @@ To set up your local development environment, follow these steps:
 
 1. Ensure you have Docker installed on your machine.
 
-2. Clone this repository:
+2. Install pnpm if you haven't already. There are several ways to do this:
+
+   - Using the standalone script (for POSIX systems):
+     ```
+     curl -fsSL https://get.pnpm.io/install.sh | sh -
+     ```
+
+   - Using npm:
+     ```
+     npm install -g pnpm
+     ```
+
+   - Using Homebrew:
+     ```
+     brew install pnpm
+     ```
+
+   For more installation options, including Windows instructions, visit the [pnpm installation guide](https://pnpm.io/installation).
+
+3. Clone this repository and install dependencies:
    ```
    git clone git@github.com:AbdellaToronto/ai-pokedex.git
    cd ai-pokedex
+   pnpm install
    ```
 
-3. Run the setup script:
+4. Run the setup script:
    ```
    chmod +x setup_local_db.sh
    ./setup_local_db.sh
@@ -26,24 +46,20 @@ To set up your local development environment, follow these steps:
    - Generate the Prisma schema file
    - Set up the necessary environment variables
 
-4. Once the script completes, your local development environment is ready!
+5. Once the script completes, your local development environment is ready!
 
-5. You can now run your Next.js application:
+6. You can now run your Next.js application:
    ```
-   npm run dev
+   pnpm dev
    ```
 
-## To get a free API key through Google AI Studio, read this!
+## Updating pnpm
 
-To access the Gemini API and start building with Google's advanced AI models, you can obtain a free API key through Google AI Studio. Here's a summary of the important steps:
+To update pnpm to the latest version, run:
 
-1. Visit [Google AI Studio](https://aistudio.google.com/) to test Gemini models without writing any code.
-2. In the top left corner of AI Studio, click on "Get API Key" to generate your Gemini API key.
-3. The free tier includes 1,500 requests per day with Gemini 1.5 Flash.
-4. You can use this API key in your code to access Gemini models, including Gemini 1.5 Flash and Gemini 1.5 Pro.
-5. With just a few lines of code, you can start generating content or creating chat interactions using the Gemini API.
-
-For more detailed information on using the Gemini API, including code examples and pricing details, check out this comprehensive guide: [Everything you need to know about the Gemini API as a developer in less than 5 minutes](https://medium.com/around-the-prompt/everything-you-need-to-know-about-the-gemini-api-as-a-developer-in-less-than-5-minutes-5e75343ccff9).
+```
+pnpm add -g pnpm
+```
 
 ## Updating the database
 
