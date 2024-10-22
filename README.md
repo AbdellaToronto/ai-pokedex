@@ -92,17 +92,9 @@ To set up your local development environment, follow these steps:
    This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
 
-## Updating `pnpm`
-
-To update `pnpm` to the latest version, run:
-
-```
-pnpm add -g pnpm
-```
-
 ## Updating the database
 
-If you need to update the database schema or data, you can modify the `pokeapi_dump.sql` file and run the setup script again. It will recreate the Docker container with the updated data.
+If you need to update the database schema or data for any reason (lets say you want to add your own custom Pokemon Data), you can modify the `pokeapi_dump.sql` file and run the setup script again. It will recreate the Docker container with the updated data.
 
 ## Challenges!
 
